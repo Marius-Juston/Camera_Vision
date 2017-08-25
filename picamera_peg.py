@@ -19,6 +19,7 @@ textColor = (255, 255, 255)
 textThickness = 2
 
 
+# Sets up camera for specific use
 def camera_setup(camera):
     camera.resolution = (WINDOW_WIDTH, WINDOW_HEIGHT)
     camera.framerate = 32
@@ -36,9 +37,9 @@ def validate(c):
     return corrected_rectangles
 
 
+# Returns from a minAreaRect the width, height and angle
 def get_rect_attributes(rectangle):
     return rectangle[0][0], rectangle[0][1], rectangle[2]
-
 
 def place_text_under(image, sizes, text_list, rect):
     # TODO implement the logic that handles as to not collide with other text, not go out of bounds
@@ -53,7 +54,7 @@ def place_text_under(image, sizes, text_list, rect):
         put_text(image, text_list[i], (x, y))
 
 
-def set_text_info(image, rect):
+def set_text_info(image, rect, spacing=2):
     width, height, angle = get_rect_attributes(rect)
 
     width_str = "Width:{}".format(round(width, 3))
@@ -62,7 +63,8 @@ def set_text_info(image, rect):
 
     text_list = (width_str, height_str, angle_str)
 
-    sizes = get_stacked_text_size(text_list)
+    sizes = get_stacked_text_size(text_list, spacing)
+
     place_text_under(image, sizes, text_list, rect)
 
 
@@ -71,14 +73,14 @@ def get_rect_bottom_left_xy(rect):
 
 
 # returns tuple (max_width, total_height)
-def get_stacked_text_size(strings):
-    location = [[0, 0]]
+def get_stacked_text_size(strings, spacing):
+    location = [[0, (len(strings) - 1) * spacing]]
 
-    for s in strings:
-        text = get_text_size(s)
+    for i in range(len(strings)):
+        text = get_text_size(strings[i])
 
         location[0][0] = max(location[0][0], text[0])
-        location[0][1] += text[1]
+        location[0][1] += text[1] + (spacing if i != len(strings) - 1 else 0)
 
         location.append(text)
 
@@ -174,7 +176,7 @@ def draw(c, image):
     return center_x
 
 
-def main():
+def main(system_arguments):
     # initialize the camera and grab a reference to the raw camera capture
     with PiCamera() as camera:
 
@@ -212,4 +214,4 @@ def main():
 
 if __name__ == '__main__':
     # TODO make it so that main uses sys.argv as an argument and the user has to pass in "python filename.py gui" to have the gui while still returning center x
-    sys.exit(main())
+    sys.exit(main(sys.argv))
